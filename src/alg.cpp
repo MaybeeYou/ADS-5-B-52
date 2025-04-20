@@ -1,6 +1,7 @@
 // Copyright 2025 NNTU-CS
 #include <string>
 #include <map>
+#include <stdexcept>
 #include "tstack.h"
 
 std::string infx2pstfx(const std::string& inf) {
@@ -58,51 +59,47 @@ std::string infx2pstfx(const std::string& inf) {
 }
 
 int eval(const std::string& post) {
-  TStack<int, 100> stack;
-
-  for (size_t i = 0; i < post.length(); ++i) {
+  TStack<int, 100> Stack;
+  for (int i = 0; i < static_cast<int>(post.length()); ++i) {
     char ch = post[i];
-
     if (isspace(ch)) {
       continue;
     }
-
     if (isdigit(ch)) {
       int num = 0;
-      while (i < post.length() && isdigit(post[i])) {
+      while (i < static_cast<int>(post.length()) && isdigit(post[i])) {
         num = num * 10 + (post[i] - '0');
         ++i;
       }
-      stack.push(num);
+      Stack.push(num);
       --i;
     } else {
-      if (stack.isEmpty()) {
+      if (Stack.isEmpty()) {
         throw std::runtime_error("Insufficient operands in postfix expression");
       }
-      int b = stack.pop();
-      if (stack.isEmpty()) {
+      int b = Stack.pop();
+      if (Stack.isEmpty()) {
         throw std::runtime_error("Insufficient operands in postfix expression");
       }
-      int a = stack.pop();
+      int a = Stack.pop();
 
       switch (ch) {
-        case '+': stack.push(a + b); break;
-        case '-': stack.push(a - b); break;
-        case '*': stack.push(a * b); break;
-        case '/':
-          if (b == 0) {
-            throw std::runtime_error("Division by zero");
-          }
-          stack.push(a / b);
-          break;
-        default: throw std::invalid_argument("Invalid operator");
+      case '+': Stack.push(a + b); break;
+      case '-': Stack.push(a - b); break;
+      case '*': Stack.push(a * b); break;
+      case '/':
+        if (b == 0) {
+          throw std::runtime_error("Division by zero");
+        }
+        Stack.push(a / b);
+        break;
+      default: throw std::invalid_argument("Invalid operator");
       }
     }
   }
-
-  if (stack.isEmpty()) {
+  if (Stack.isEmpty()) {
     throw std::runtime_error("Empty stack after evaluation");
   }
 
-  return stack.pop();
+  return Stack.pop();
 }
